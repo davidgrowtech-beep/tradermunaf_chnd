@@ -119,21 +119,44 @@ fbq('track', 'PageView');
 <div class="disclaimer"><strong>Disclaimer:</strong> This Platform is only for educational purpose only, not recommended for any investment.</div>
 
 <script>
-document.getElementById("telegramBtn").addEventListener("click", function(e){
-    e.preventDefault();
-    const bridgePageLink = this.href;
+  const TELEGRAM_URL = "https://telegram.me/+yrOewUOsujUyYjhl";
+  let redirected = false;
 
-    // Meta Pixel Event Tracking
-    fbq('track', 'Lead', {
+  function trackAndRedirect(link) {
+    if (redirected) return;
+    redirected = true;
+
+    if (typeof fbq !== 'undefined') {
+      fbq('track', 'Lead', {
         content_name: 'Telegram Community',
         button_click: true
-    });
+      }, {
+        eventID: 'telegram_subscribe_' + Date.now()
+      });
+    } else {
+      console.warn("fbq is not defined. Tracking skipped.");
+    }
 
     setTimeout(() => {
-        window.location.href = bridgePageLink;
-    }, 300);
-});
-</script>
-  
+      window.location.href = link;
+    }, 500);
+  }
+
+  document.getElementById("telegramBtn").addEventListener("click", function (e) {
+    e.preventDefault();
+    trackAndRedirect(this.href);
+  });
+
+  let time = 30;
+  const counter = document.getElementById("count");
+  const countdown = setInterval(() => {
+    time--;
+    if (counter) counter.innerText = time;
+    if (time <= 0) {
+      clearInterval(countdown);
+      trackAndRedirect(TELEGRAM_URL);
+    }
+  }, 1000);
+</script>  
 </body>
 </html>
